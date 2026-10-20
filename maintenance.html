@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>🔧 Đang bảo trì</title>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
+input{-webkit-user-select:text;user-select:text}
+html,body{min-height:100%}
+body{background:radial-gradient(ellipse at 50% 0%,#2e1166 0%,#0a0a2e 70%) fixed;color:#eef0ff;font-family:Quicksand,system-ui,sans-serif;line-height:1.6}
+#fc{position:fixed;left:0;bottom:0;width:100%;height:32vh;height:32dvh;max-height:320px;z-index:0;pointer-events:none}
+main{position:relative;z-index:1;max-width:560px;margin:0 auto;padding:calc(18px + env(safe-area-inset-top,0px)) 16px calc(30vh + 20px);padding-bottom:calc(30dvh + 20px);text-align:center}
+h1{font-size:22px;color:#ff5b6b;text-shadow:0 0 18px rgba(255,91,107,.5);letter-spacing:.5px}
+h1 span{display:inline-block;animation:spin 3s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.sub{font-size:14px;opacity:.75;margin-top:4px}
+.card{background:rgba(10,10,46,.8);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:14px 16px;margin:14px 0}
+.term{font-family:'Space Mono',monospace;font-size:12.5px;text-align:left;min-height:150px}
+.term div{margin:3px 0;word-break:break-word}
+.ok{color:#39ff88}.warn{color:#ffd23f}.err{color:#ff7b88}.dim{color:#9aa3ff}
+.cur::after{content:'▌';animation:bl 1s steps(1) infinite}
+@keyframes bl{50%{opacity:0}}
+.bar{height:14px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden}
+.bar i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,#ff5b6b,#ffd23f,#39ff88,#ffd23f,#ff5b6b);background-size:200% 100%}
+.bar i.stuck{animation:sh 1.4s linear infinite}
+@keyframes sh{to{background-position:-200% 0}}
+.mono{font-family:'Space Mono',monospace;font-size:12.5px;margin-top:8px}
+.cd p{font-size:14px;margin-bottom:10px}
+.boxes{display:flex;gap:8px;justify-content:center}
+.boxes div{flex:1;max-width:84px;background:rgba(255,255,255,.07);border-radius:10px;padding:8px 0;font-family:'Space Mono',monospace;font-size:22px;font-weight:700;color:#ffd23f}
+.boxes small{display:block;font-size:10px;font-weight:400;color:#cfd3ff;font-family:Quicksand,sans-serif}
+button{font:700 15px Quicksand,sans-serif;cursor:pointer;border:0;border-radius:999px;padding:12px 24px;background:#ff5b6b;color:#fff;box-shadow:0 4px 14px rgba(255,91,107,.35)}
+button:active{transform:scale(.96)}
+button.shake{animation:sk .4s}
+@keyframes sk{25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+#retryMsg,#lockMsg{margin-top:10px;font-size:14px;min-height:22px}
+#lock,#secret{margin-top:14px;padding-top:14px;border-top:1px dashed rgba(255,255,255,.2)}
+#retry[hidden]~#secret{margin-top:0;border-top:0;padding-top:0}
+#lock p{font-size:14px}
+.q{font-weight:700;margin:8px 0 10px}
+input{width:100%;max-width:240px;padding:11px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#fff;font:600 16px Quicksand,sans-serif;text-align:center;margin-bottom:10px;outline:0}
+#secret h2{color:#39ff88;font-size:17px;margin-bottom:8px}
+#secret p{font-size:15px}
+.cap{font-size:13.5px;opacity:.85;margin-top:18px}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<canvas id="fc"></canvas>
+<main>
+  <h1><span>🔧</span> HỆ THỐNG ĐANG BẢO TRÌ</h1>
+  <p class="sub">Khánh Vy Quiz đã hoàn thành nhiệm vụ 20/10</p>
+
+  <section class="card term" id="term"></section>
+
+  <section class="card">
+    <div class="bar"><i id="fill"></i></div>
+    <p class="mono" id="pct">Đang nâng cấp... 0%</p>
+  </section>
+
+  <section class="card cd">
+    <p>Phiên bản 2.0 · Sử khó hơn nữa · ra mắt sau</p>
+    <div class="boxes">
+      <div><span id="cd">0</span><small>ngày</small></div>
+      <div><span id="ch">00</span><small>giờ</small></div>
+      <div><span id="cm">00</span><small>phút</small></div>
+      <div><span id="cs">00</span><small>giây</small></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <button id="retry">↻ Thử lại</button>
+    <p id="retryMsg"></p>
+    <div id="lock" hidden>
+      <p>🔒 Cổng kỹ thuật viên · trả lời đúng để vào cửa sau</p>
+      <p class="q">Trận Điện Biên Phủ kéo dài chính xác bao nhiêu ngày đêm?</p>
+      <input id="ans" inputmode="numeric" placeholder="Nhập số..." autocomplete="off">
+      <br><button id="go">Mở khóa</button>
+      <p id="lockMsg"></p>
+    </div>
+    <div id="secret" hidden>
+      <h2>✔ Truy cập hợp lệ</h2>
+      <p>Bảo trì chỉ là cái cớ thôi 😝<br>Quiz đóng cửa thật, nhưng lời chúc thì không hết hạn:<br>em gái học giỏi, thi cử điểm cao nha~ ✨<br>Hẹn gặp lại ở phiên bản 2.0 🌸</p>
+    </div>
+  </section>
+
+  <p class="cap">Quiz đã đóng cửa, hoa thì vẫn nở 🌸<br>(thử vuốt tay vào hoa xem)</p>
+</main>
+
+<script>
+/* ===== Chống copy ===== */
+['copy','cut'].forEach(ev=>document.addEventListener(ev,e=>{e.preventDefault();if(e.clipboardData)e.clipboardData.setData('text/plain','Không được copy đâu em nha 😜')}));
+['contextmenu','selectstart','dragstart'].forEach(ev=>document.addEventListener(ev,e=>{if(e.target.tagName!=='INPUT')e.preventDefault()}));
+
+/* ===== Log kiểu terminal ===== */
+const $=id=>document.getElementById(id),term=$('term');
+const LOG=[
+ ['> Đóng cổng 20/10 ............ [OK]','ok'],
+ ['> Quét hành vi Google lén ..... phát hiện đáng ngờ 👀','warn'],
+ ['> Môn Địa: hạ độ khó xuống mức "nhắm mắt" [OK]','ok'],
+ ['> Môn Sử: vẫn khó hơn Địa [ĐÃ XÁC NHẬN, KHÔNG CÃI]','ok'],
+ ['> Nâng cấp lên v2.0 (Sử khó hơn nữa)...','dim']
+];
+function typeLine(txt,cls,done){
+  const d=document.createElement('div');d.className=cls+' cur';term.appendChild(d);let i=0;
+  (function step(){d.textContent=txt.slice(0,++i);if(i<txt.length)setTimeout(step,16);else{d.classList.remove('cur');setTimeout(done,350)}})();
+}
+function runLog(i){
+  if(i<LOG.length)return typeLine(LOG[i][0],LOG[i][1],()=>runLog(i+1));
+  runBar();
+}
+/* ===== Thanh tiến độ kẹt ở 99% ===== */
+function runBar(){
+  const f=$('fill'),p=$('pct'),t0=performance.now(),dur=3800;
+  (function tick(now){
+    const x=Math.min(1,(now-t0)/dur),v=Math.round(99*(1-Math.pow(1-x,3)));
+    f.style.width=v+'%';p.textContent='Đang nâng cấp... '+v+'%';
+    if(x<1)return requestAnimationFrame(tick);
+    f.classList.add('stuck');p.textContent='99% · đang chờ... (có thể là mãi mãi)';
+    setTimeout(()=>typeLine('> Kỹ thuật viên: đang ngủ 😴','err',()=>{}),700);
+  })(t0);
+}
+runLog(0);
+
+/* ===== Đếm ngược tới 20/10/2027 (giờ VN) ===== */
+const TARGET=Date.UTC(2027,9,19,17,0,0);
+function cd(){
+  let s=Math.floor((TARGET-Date.now())/1000);
+  if(s<=0){$('cd').textContent='0';return}
+  const d=Math.floor(s/86400);s%=86400;const h=Math.floor(s/3600);s%=3600;
+  $('cd').textContent=d;$('ch').textContent=String(h).padStart(2,'0');$('cm').textContent=String(Math.floor(s/60)).padStart(2,'0');$('cs').textContent=String(s%60).padStart(2,'0');
+}
+cd();setInterval(cd,1000);
+
+/* ===== Nút "Thử lại" + khóa câu hỏi Sử ===== */
+const RETRY=['Vẫn đang bảo trì 🔧','Bấm nữa cũng vậy thôi...','Đã bảo là đang bảo trì rồi mà 😤','Thôi, ôn bài Sử thật đi em 😜','Em kiên trì ghê đó...','Còn bấm nữa là tui... mở cửa sau luôn à 👀'];
+let clicks=0;
+$('retry').onclick=function(){
+  clicks++;this.classList.remove('shake');void this.offsetWidth;this.classList.add('shake');
+  const m=$('retryMsg');
+  if(clicks<=RETRY.length)m.textContent=RETRY[clicks-1];
+  else if(clicks===RETRY.length+1){m.textContent='Thôi được rồi, cửa sau vừa mở 🔓';$('lock').hidden=false;sway(.3)}
+  else m.textContent='Cổng mở rồi, trả lời câu hỏi đi chứ 😤';
+};
+const WRONG=['Sai rồi! Lịch Sử khó hơn Địa mà 😤','Vẫn sai... Gợi ý: số nằm giữa 54 và 58 🤏','Sai nữa?! Em có học Sử không vậy 😭'];
+let wrong=0;
+function tryUnlock(){
+  const v=($('ans').value.match(/\d+/)||[''])[0],m=$('lockMsg');
+  if(v==='56'){$('lock').hidden=true;$('retry').hidden=true;$('retryMsg').hidden=true;$('secret').hidden=false;sway(.5);return}
+  m.textContent=WRONG[wrong++%WRONG.length];$('ans').select();
+}
+$('go').onclick=tryUnlock;
+$('ans').addEventListener('keydown',e=>{if(e.key==='Enter')tryUnlock()});
+
+/* ===== Vườn hoa tương tác ===== */
+const cv=$('fc'),cx=cv.getContext('2d');
+let fl=[],bl=[],W=0,H=0,D=1,T0=performance.now()+600,pT=0,pX=0,pY=0,pV=0,pL=null;
+const cols=['#ffffff','#fff3b0','#ff4f8b','#ff8fc0','#ffd166','#c77dff','#ff9a76','#ffffff','#b388ff'];
+const rn=(a,b)=>a+Math.random()*(b-a),ez=x=>1-Math.pow(1-x,3),bk=x=>1+2.70158*Math.pow(x-1,3)+1.70158*Math.pow(x-1,2);
+function build(){
+  fl=[];bl=[];
+  [{n:W/24,s:.62,a:[.35,.55],c:'#6fcf8a'},{n:W/30,s:.82,a:[.32,.66],c:'#4fbf78'},{n:W/38,s:1.05,a:[.28,.78],c:'#2f9e5b'}].forEach((r,ri)=>{
+    const n=Math.max(4,Math.round(r.n));
+    for(let i=0;i<n;i++){const x=(i+rn(.1,.9))/n*W;fl.push({x,s:r.s*rn(.8,1.15),h:rn(r.a[0],r.a[1])*H*(.55+.45*r.s),c:r.c,p:cols[Math.floor(Math.random()*cols.length)],np:5+Math.floor(Math.random()*4),k:Math.random()<.7?'#ffc62d':'#a8552b',d:rn(0,2200)+ri*250,ph:rn(0,6.28),a:0,v:0,tx:x,ty:H})}
+  });
+  for(let i=0,n=Math.round(W/5);i<n;i++)bl.push({x:rn(0,W),h:rn(.1,.3)*H,ph:rn(0,6.28),a:0,v:0,g:i%3,d:rn(0,1800)});
+}
+function size(){
+  const r=cv.getBoundingClientRect(),w=Math.round(r.width),h=Math.round(r.height);if(!w||!h)return false;
+  const d=Math.min(devicePixelRatio||1,2);
+  if(w!==W||h!==H||d!==D){const rb=Math.abs(w-W)>8||!fl.length;W=w;H=h;D=d;cv.width=w*d;cv.height=h*d;if(rb)build()}
+  return true;
+}
+const xy=(a,b)=>{const r=cv.getBoundingClientRect();return[a-r.left,b-r.top]};
+function poke(a,b){const[x,y]=xy(a,b),n=performance.now();if(pL)pV=(x-pL.x)/Math.max(8,n-pL.t);pL={x,y,t:n};pT=n;pX=x;pY=y}
+function burst(a,b){const[x,y]=xy(a,b),R=95;pL=null;
+  fl.forEach(f=>{const dx=f.tx-x,d=Math.hypot(dx,f.ty-y);if(d<R)f.v+=(dx>=0?1:-1)*.14*(1-d/R)});
+  bl.forEach(g=>{const dx=g.x-x,d=Math.hypot(dx,H-g.h*.5-y);if(d<R)g.v+=(dx>=0?1:-1)*.12*(1-d/R)})}
+function sway(k){fl.forEach(f=>f.v+=rn(-k,k));bl.forEach(g=>g.v+=rn(-k*.8,k*.8))}
+addEventListener('mousemove',e=>poke(e.clientX,e.clientY));
+addEventListener('mousedown',e=>burst(e.clientX,e.clientY));
+addEventListener('touchmove',e=>{const t=e.touches[0];if(t)poke(t.clientX,t.clientY)},{passive:true});
+addEventListener('touchstart',e=>{const t=e.touches[0];if(t)burst(t.clientX,t.clientY)},{passive:true});
+function frame(t){
+  requestAnimationFrame(frame);
+  if(document.hidden||!size())return;
+  const poking=t-pT<90,R=80,vx=Math.max(-.14,Math.min(.14,pV*.05)),c=cx;
+  const wind=(x,ph)=>Math.sin(t*.0011+ph+x*.006)*.07+Math.sin(t*.0004+x*.003)*.04;
+  c.setTransform(D,0,0,D,0,0);c.clearRect(0,0,W,H);c.lineCap='round';c.lineWidth=2;
+  const gc=['#5fc27d','#4fbf78','#2f9e5b'];
+  const grass=g=>{c.strokeStyle=gc[g];c.beginPath();
+    bl.forEach(b=>{if(b.g!==g)return;
+      b.v+=(wind(b.x,b.ph)-b.a)*.04;if(poking){const d=Math.hypot(b.x-pX,H-b.h*.5-pY);if(d<R)b.v+=vx*(1-d/R)}b.v*=.92;b.a+=b.v;
+      const p=Math.max(0,Math.min(1,(t-T0-b.d)/1200));if(p<=0)return;const h=b.h*ez(p);
+      c.moveTo(b.x,H+2);c.quadraticCurveTo(b.x+Math.sin(b.a*.3)*h*.5,H-h*.6,b.x+Math.sin(b.a)*h,H-Math.cos(b.a)*h)});c.stroke()};
+  grass(0);
+  fl.forEach(f=>{
+    f.v+=(wind(f.x,f.ph)-f.a)*.035;if(poking){const d=Math.hypot(f.tx-pX,f.ty-pY);if(d<R)f.v+=vx*(1-d/R)}f.v*=.93;f.a+=f.v;
+    const p=Math.max(0,Math.min(1,(t-T0-f.d)/1800));if(p<=0)return;
+    const h=f.h*ez(Math.min(1,p/.6)),hg=p<.5?0:bk((p-.5)/.5),bx=f.x,by=H+2,ccx=bx+Math.sin(f.a*.3)*h*.5,ccy=by-h*.6,tx=bx+Math.sin(f.a)*h*1.1,ty=by-Math.cos(f.a)*h;
+    f.tx=tx;f.ty=ty;
+    c.strokeStyle=f.c;c.lineWidth=2.2*f.s;c.beginPath();c.moveTo(bx,by);c.quadraticCurveTo(ccx,ccy,tx,ty);c.stroke();
+    c.fillStyle=f.c;c.save();c.translate(.25*bx+.5*ccx+.25*tx,.25*by+.5*ccy+.25*ty);c.rotate(f.a+.9);c.beginPath();c.ellipse(5*f.s,0,6*f.s,2.4*f.s,0,0,6.2832);c.fill();c.restore();
+    if(hg>0){const r=Math.min(16,9+W/150)*f.s*hg;c.save();c.translate(tx,ty);c.rotate(f.a*1.2);c.fillStyle=f.p;
+      for(let i=0;i<f.np;i++){c.save();c.rotate(i*6.2832/f.np);c.beginPath();c.ellipse(0,-r*.62,r*.34,r*.62,0,0,6.2832);c.fill();c.restore()}
+      c.fillStyle=f.k;c.beginPath();c.arc(0,0,r*.32,0,6.2832);c.fill();c.restore()}
+  });
+  c.lineWidth=2;grass(1);grass(2);
+}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
