@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <title>Luyện kiến thức lớp 12</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -88,7 +90,7 @@ html,body{width:100%;min-height:100%;overflow:hidden;font-family:'Quicksand',san
 .btn-surprise{padding:16px 36px;font-family:'Quicksand',sans-serif;font-size:17px;font-weight:700;color:#0a0a2e;background:linear-gradient(135deg,#ffd700,#ffb700);border:none;border-radius:50px;cursor:pointer;box-shadow:0 0 30px rgba(255,215,0,0.4);animation:pulse-gold 2s ease-in-out infinite;transition:transform .2s ease;display:none}
 .btn-surprise:hover{transform:scale(1.06)}
 @keyframes pulse-gold{0%,100%{box-shadow:0 0 30px rgba(255,215,0,0.4)}50%{box-shadow:0 0 50px rgba(255,215,0,0.6)}}
-#finalScreen{background:radial-gradient(ellipse at center,rgba(45,35,10,0.8) 0%,rgba(10,10,46,0.95) 70%);text-align:center;justify-content:flex-start}
+#finalScreen{background:radial-gradient(ellipse at 50% 15%,#ffc4dc 0%,#ff9ec6 55%,#ff7eb3 100%);text-align:center;justify-content:flex-start;padding-bottom:calc(20px + 17vh);padding-bottom:calc(20px + 17dvh)}
 #confettiCanvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
 .final-content{position:relative;z-index:1;max-width:520px;width:100%}
 .final-line{opacity:0;transform:translateY(20px);transition:opacity .8s ease,transform .8s ease;margin-bottom:16px}
@@ -113,6 +115,15 @@ button:focus-visible{outline:3px solid #fff;outline-offset:3px}
 .action-row{display:flex;justify-content:center;flex-wrap:wrap;gap:8px}
 .results-note{font-size:13px;line-height:1.6;color:rgba(255,255,255,.52);margin:-14px 0 22px}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
+#flowerCanvas{position:absolute;left:0;bottom:0;width:100%;height:30vh;max-height:300px;height:30dvh;z-index:0;pointer-events:none}
+#finalScreen .final-line{margin-bottom:12px}
+#finalScreen .final-flower{font-size:40px}
+#finalScreen .final-text{color:#fff;font-weight:600;text-shadow:0 1px 2px rgba(140,15,75,0.55),0 2px 14px rgba(140,15,75,0.35)}
+#finalScreen .final-text.highlight{color:#fff;text-shadow:0 2px 12px rgba(170,20,90,0.6)}
+#finalScreen .final-text.name-highlight{background:none;-webkit-text-fill-color:#fff;color:#fff;text-shadow:0 2px 3px rgba(140,15,75,0.6),0 0 18px rgba(255,255,255,0.5)}
+#finalScreen .btn-restart{position:relative;z-index:2;background:rgba(255,255,255,0.92);color:#d81b78;border-color:#fff;box-shadow:0 4px 14px rgba(170,20,90,0.3)}
+#finalScreen .final-ps{color:#7a0f45;font-weight:500}
+#finalScreen .final-date{color:#fff;text-shadow:0 2px 10px rgba(170,20,90,0.6)}
 @media(max-width:600px){
 .screen{padding-left:14px;padding-right:14px}.quiz-container{padding:12px 0;justify-content:flex-start}.terminal-box{padding:20px}.terminal-line{font-size:13px}.quiz-header h2{font-size:22px}.question-text{font-size:15px}.option-btn{padding:14px 16px;font-size:14px}.transition-title{font-size:26px}.transition-score{font-size:56px}.transition-score .score-total{font-size:28px}.results-title{font-size:24px}.results-comment{font-size:16px}.final-text{font-size:16px}.final-text.highlight{font-size:19px}.final-text.name-highlight{font-size:20px}.final-date{font-size:24px}.btn-challenge,.btn-next-round,.btn-surprise{padding:14px 28px;font-size:16px}.timer-wrapper{width:60px;height:60px}.timer-svg{width:60px;height:60px}.timer-text{font-size:20px}
 }
@@ -214,18 +225,19 @@ button:focus-visible{outline:3px solid #fff;outline-offset:3px}
     </div>
     <p class="results-comment" id="resultsComment" aria-live="polite"></p>
     <p class="results-note">Bài làm được chấm ngay trên thiết bị này. Rời tab không bị trừ điểm (có thể do thông báo hoặc cuộc gọi), nhưng đồng hồ vẫn chạy nhé.</p>
-    <div class="action-row"><button class="btn-surprise" id="btnSurprise" onclick="showFinal()">Tiếp tục→</button><button class="btn-restart" id="btnRestartResults" onclick="restartQuiz()" style="display:none">↻ Chơi lại</button></div>
+    <div class="action-row"><button class="btn-surprise" id="btnSurprise" onclick="goFullscreen();showFinal()">Tiếp tục→</button><button class="btn-restart" id="btnRestartResults" onclick="restartQuiz()" style="display:none">↻ Chơi lại</button></div>
   </div>
 </div>
 
 <div id="finalScreen" class="screen">
+  <canvas id="flowerCanvas"></canvas>
   <canvas id="confettiCanvas"></canvas>
   <div class="final-content">
     <div class="final-line"><span class="final-flower">🌸</span></div>
     <div class="final-line"><p class="final-text highlight">Nhưng mà...</p></div>
     <div class="final-line"><p class="final-text">Dù Sử có khó hơn Địa bao nhiêu đi nữa,<br>dù điểm thi có "toang" thế nào...</p></div>
     <div class="final-line"><p class="final-text name-highlight">Thì hôm nay Khánh Vy vẫn là người thắng cuộc,<br>vì là 20/10 mà =))</p></div>
-    <div class="final-line"><p class="final-text">Chúc em gái 20/10 thật nhiều niềm vui,<br>luôn vui tươi, học giỏi<br>và thi cử điểm cao nha~ ✨</p></div>
+    <div class="final-line"><p class="final-text">Chúc em 20/10 thật nhiều niềm vui,<br>luôn vui tươi, học giỏi<br>và thi cử điểm cao nha~ ✨</p></div>
     <div class="final-line"><p class="final-ps">(P/S: Nhưng ôn lại Sử đi em, điểm đáng lo lắm đó 😜)</p></div>
     <div class="final-line"><p class="final-date">💛 Happy 20/10/2026</p></div>
     <div class="final-line"><button class="btn-restart" onclick="restartQuiz(true)">↻ Chơi lại từ đầu</button></div>
@@ -375,7 +387,64 @@ function getFinalMessage(){
   L[2].innerHTML='<p class="final-text">'+a+'</p>';
   L[5].innerHTML='<p class="final-ps">'+b+'</p>';
 }
-function showFinal(){clearQuizTimer();quizRunning=false;activeQuizType=null;bgMode='golden';particles=[];const gc=['#ffd700','#ffb700','#ff69b4','#f0e68c','#ffffff'];for(let i=0;i<50;i++)particles.push({x:Math.random()*bgCanvas.width,y:Math.random()*bgCanvas.height,r:Math.random()*3+1,vx:(Math.random()-.5)*.4,vy:(Math.random()-.5)*.4-.2,color:gc[Math.floor(Math.random()*gc.length)],alpha:Math.random()*.3+.15});getFinalMessage();showScreen('finalScreen');startConfetti();playCelebration();const lines=document.querySelectorAll('#finalScreen .final-line');lines.forEach(line=>line.classList.remove('visible'));lines.forEach((line,i)=>setTimeout(()=>{if(document.getElementById('finalScreen').classList.contains('active'))line.classList.add('visible')},350+i*500))}
+/* Vườn hoa + toàn màn hình */
+function goFullscreen(){try{const d=document.documentElement,f=d.requestFullscreen||d.webkitRequestFullscreen||d.msRequestFullscreen;if(f&&!document.fullscreenElement&&!document.webkitFullscreenElement){const r=f.call(d);if(r&&r.catch)r.catch(()=>{})}}catch(e){}}
+const flowerCv=document.getElementById('flowerCanvas'),flowerCtx=flowerCv.getContext('2d'),finalEl=document.getElementById('finalScreen');
+let flowers=[],blades=[],fW=0,fH=0,fDpr=1,fRAF=0,fStart=0,pokeT=0,pokeX=0,pokeY=0,pokeVX=0,pLast=null;
+const petalCols=['#ffffff','#fff3b0','#ff4f8b','#e91e75','#ffd166','#c77dff','#ff9a76','#ffffff','#b388ff'];
+const frnd=(a,b)=>a+Math.random()*(b-a),fEase=x=>1-Math.pow(1-x,3),fBack=x=>1+2.70158*Math.pow(x-1,3)+1.70158*Math.pow(x-1,2);
+function buildGarden(){
+  flowers=[];blades=[];
+  [{n:fW/24,s:.62,a:[.35,.55],col:'#8fd9a0'},{n:fW/30,s:.82,a:[.32,.66],col:'#4fbf78'},{n:fW/38,s:1.05,a:[.28,.78],col:'#2f9e5b'}].forEach((r,ri)=>{
+    const n=Math.max(4,Math.round(r.n));
+    for(let i=0;i<n;i++){const x=(i+frnd(.1,.9))/n*fW;flowers.push({x,ri,s:r.s*frnd(.8,1.15),h:frnd(r.a[0],r.a[1])*fH*(.55+.45*r.s),col:r.col,pc:petalCols[Math.floor(Math.random()*petalCols.length)],np:5+Math.floor(Math.random()*4),cc:Math.random()<.7?'#ffc62d':'#a8552b',delay:frnd(0,2200)+ri*250,ph:frnd(0,6.28),ang:0,vel:0,tx:x,ty:fH})}
+  });
+  for(let i=0,nb=Math.round(fW/5);i<nb;i++)blades.push({x:frnd(0,fW),h:frnd(.1,.3)*fH,ph:frnd(0,6.28),ang:0,vel:0,g:i%3,d:frnd(0,1800)});
+}
+function fSize(){
+  const r=flowerCv.getBoundingClientRect(),w=Math.round(r.width),h=Math.round(r.height);if(!w||!h)return false;
+  const d=Math.min(window.devicePixelRatio||1,2);
+  if(w!==fW||h!==fH||d!==fDpr){const rebuild=Math.abs(w-fW)>8||!flowers.length;fW=w;fH=h;fDpr=d;flowerCv.width=w*d;flowerCv.height=h*d;if(rebuild)buildGarden()}
+  return true;
+}
+function localXY(cx,cy){const r=flowerCv.getBoundingClientRect();return[cx-r.left,cy-r.top]}
+function poke(cx,cy){const[x,y]=localXY(cx,cy),n=performance.now();if(pLast)pokeVX=(x-pLast.x)/Math.max(8,n-pLast.t);pLast={x,y,t:n};pokeT=n;pokeX=x;pokeY=y}
+function burst(cx,cy){const[x,y]=localXY(cx,cy),R=95;pLast=null;
+  flowers.forEach(f=>{const dx=f.tx-x,d=Math.hypot(dx,f.ty-y);if(d<R)f.vel+=(dx>=0?1:-1)*.14*(1-d/R)});
+  blades.forEach(b=>{const dx=b.x-x,d=Math.hypot(dx,fH-b.h*.5-y);if(d<R)b.vel+=(dx>=0?1:-1)*.12*(1-d/R)})}
+finalEl.addEventListener('mousemove',e=>poke(e.clientX,e.clientY));
+finalEl.addEventListener('mousedown',e=>burst(e.clientX,e.clientY));
+finalEl.addEventListener('touchmove',e=>{const t=e.touches[0];if(t)poke(t.clientX,t.clientY)},{passive:true});
+finalEl.addEventListener('touchstart',e=>{const t=e.touches[0];if(t)burst(t.clientX,t.clientY)},{passive:true});
+function startFlowers(){fW=0;flowers=[];blades=[];pLast=null;fStart=performance.now()+400;cancelAnimationFrame(fRAF);fRAF=requestAnimationFrame(fFrame)}
+function fFrame(t){
+  if(t>fStart&&!finalEl.classList.contains('active')){fRAF=0;return}
+  fRAF=requestAnimationFrame(fFrame);
+  if(document.hidden||!fSize())return;
+  const c=flowerCtx,poking=t-pokeT<90,R=80,vx=Math.max(-.14,Math.min(.14,pokeVX*.05));
+  const wind=(x,ph)=>Math.sin(t*.0011+ph+x*.006)*.07+Math.sin(t*.0004+x*.003)*.04;
+  c.setTransform(fDpr,0,0,fDpr,0,0);c.clearRect(0,0,fW,fH);c.lineCap='round';c.lineWidth=2;
+  const gcol=['#7fd49a','#4fbf78','#2f9e5b'];
+  const grass=g=>{c.strokeStyle=gcol[g];c.beginPath();
+    blades.forEach(b=>{if(b.g!==g)return;
+      b.vel+=(wind(b.x,b.ph)-b.ang)*.04;if(poking){const dx=b.x-pokeX,d=Math.hypot(dx,fH-b.h*.5-pokeY);if(d<R)b.vel+=vx*(1-d/R)}b.vel*=.92;b.ang+=b.vel;
+      const p=Math.max(0,Math.min(1,(t-fStart-b.d)/1200));if(p<=0)return;const h=b.h*fEase(p);
+      c.moveTo(b.x,fH+2);c.quadraticCurveTo(b.x+Math.sin(b.ang*.3)*h*.5,fH-h*.6,b.x+Math.sin(b.ang)*h,fH-Math.cos(b.ang)*h)});c.stroke()};
+  grass(0);
+  flowers.forEach(f=>{
+    f.vel+=(wind(f.x,f.ph)-f.ang)*.035;if(poking){const d=Math.hypot(f.tx-pokeX,f.ty-pokeY);if(d<R)f.vel+=vx*(1-d/R)}f.vel*=.93;f.ang+=f.vel;
+    const p=Math.max(0,Math.min(1,(t-fStart-f.delay)/1800));if(p<=0)return;
+    const H=f.h*fEase(Math.min(1,p/.6)),hg=p<.5?0:fBack((p-.5)/.5),bx=f.x,by=fH+2,cx=bx+Math.sin(f.ang*.3)*H*.5,cy=by-H*.6,tx=bx+Math.sin(f.ang)*H*1.1,ty=by-Math.cos(f.ang)*H;
+    f.tx=tx;f.ty=ty;
+    c.strokeStyle=f.col;c.lineWidth=2.2*f.s;c.beginPath();c.moveTo(bx,by);c.quadraticCurveTo(cx,cy,tx,ty);c.stroke();
+    c.fillStyle=f.col;c.save();c.translate(.25*bx+.5*cx+.25*tx,.25*by+.5*cy+.25*ty);c.rotate(f.ang+.9);c.beginPath();c.ellipse(5*f.s,0,6*f.s,2.4*f.s,0,0,6.2832);c.fill();c.restore();
+    if(hg>0){const r=Math.min(16,9+fW/150)*f.s*hg;c.save();c.translate(tx,ty);c.rotate(f.ang*1.2);c.fillStyle=f.pc;
+      for(let i=0;i<f.np;i++){c.save();c.rotate(i*6.2832/f.np);c.beginPath();c.ellipse(0,-r*.62,r*.34,r*.62,0,0,6.2832);c.fill();c.restore()}
+      c.fillStyle=f.cc;c.beginPath();c.arc(0,0,r*.32,0,6.2832);c.fill();c.restore()}
+  });
+  c.lineWidth=2;grass(1);grass(2);
+}
+function showFinal(){clearQuizTimer();quizRunning=false;activeQuizType=null;bgMode='golden';particles=[];const gc=['#ffd700','#ffb700','#ff69b4','#f0e68c','#ffffff'];for(let i=0;i<50;i++)particles.push({x:Math.random()*bgCanvas.width,y:Math.random()*bgCanvas.height,r:Math.random()*3+1,vx:(Math.random()-.5)*.4,vy:(Math.random()-.5)*.4-.2,color:gc[Math.floor(Math.random()*gc.length)],alpha:Math.random()*.3+.15});getFinalMessage();showScreen('finalScreen');startFlowers();startConfetti();playCelebration();const lines=document.querySelectorAll('#finalScreen .final-line');lines.forEach(line=>line.classList.remove('visible'));lines.forEach((line,i)=>setTimeout(()=>{if(document.getElementById('finalScreen').classList.contains('active'))line.classList.add('visible')},350+i*500))}
 function restartQuiz(fromFinal=false){if(fromFinal)hasReplayed=true;screenChangeId++;clearQuizTimer();quizRunning=false;activeQuizType=null;pendingCheat=false;closeCheat();confettiActive=false;document.getElementById('transitionScore').classList.remove('revealed');document.getElementById('btnSurprise').style.display='none';document.getElementById('btnRestartResults').style.display=hasReplayed?'inline-flex':'none';document.getElementById('btnSkipIntro').style.display=hasReplayed?'inline-flex':'none';document.getElementById('resultsComment').textContent='';document.getElementById('historyBar').style.width='0%';document.getElementById('geoBar').style.width='0%';document.querySelectorAll('#terminalLines .terminal-line').forEach(line=>{line.classList.remove('visible');line.textContent=''});document.getElementById('btnChallenge').style.display='none';document.getElementById('finalScreen').querySelectorAll('.final-line').forEach(line=>line.classList.remove('visible'));historyQuestions.forEach((q,i)=>historyQuestions[i]=shuffleQ(q));geoQuestions.forEach((q,i)=>geoQuestions[i]=shuffleQ(q));showScreen('introScreen');setTimeout(()=>{if(document.getElementById('introScreen').classList.contains('active'))runTerminal()},250)}
 </script>
 </body>
