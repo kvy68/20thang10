@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Luyện kiến thức lớp 12</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;min-height:100%;overflow:hidden;font-family:'Quicksand',sans-serif;background:#0a0a2e;color:#fff;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased}
+#bgCanvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
+#muteBtn{position:fixed;top:16px;right:16px;z-index:9999;width:44px;height:44px;border-radius:50%;border:2px solid rgba(255,255,255,0.3);background:rgba(10,10,46,0.7);backdrop-filter:blur(8px);color:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .3s ease}
+#muteBtn:hover{border-color:rgba(255,255,255,0.6);background:rgba(10,10,46,0.9);transform:scale(1.1)}
+#muteBtn.muted{opacity:.5}
+.screen{position:fixed;inset:0;width:100%;height:100%;height:100dvh;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:calc(20px + env(safe-area-inset-top)) 20px calc(20px + env(safe-area-inset-bottom));opacity:0;pointer-events:none;transition:opacity .35s ease,transform .35s ease;transform:translateY(18px);overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.screen.active{opacity:1;pointer-events:auto;transform:translateY(0);z-index:2}
+#introScreen{justify-content:center;align-items:center;padding:calc(24px + env(safe-area-inset-top)) 20px calc(24px + env(safe-area-inset-bottom))}
+.terminal-box{max-width:650px;width:100%;background:rgba(0,10,0,0.6);border:1px solid rgba(0,255,65,0.25);border-radius:12px;padding:30px;box-shadow:0 0 40px rgba(0,255,65,0.08),inset 0 0 60px rgba(0,0,0,0.3)}
+.terminal-header{display:flex;gap:8px;margin-bottom:20px;padding-bottom:15px;border-bottom:1px solid rgba(0,255,65,0.15)}
+.terminal-dot{width:12px;height:12px;border-radius:50%}
+.terminal-dot.r{background:#ff5f57}.terminal-dot.y{background:#ffbd2e}.terminal-dot.g{background:#28c840}
+.terminal-line{font-family:'Space Mono',monospace;font-size:15px;color:#00ff41;margin-bottom:8px;line-height:1.6;text-shadow:0 0 10px rgba(0,255,65,0.5);opacity:0;white-space:pre-wrap;word-break:break-word}
+.terminal-line.visible{opacity:1}
+.terminal-line .cursor{display:inline-block;width:10px;height:18px;background:#00ff41;vertical-align:text-bottom;animation:blink .7s step-end infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.btn-challenge{display:none;margin:30px auto 0;padding:16px 36px;font-family:'Quicksand',sans-serif;font-size:18px;font-weight:700;color:#0a0a2e;background:linear-gradient(135deg,#00ff41,#00cc33);border:none;border-radius:50px;cursor:pointer;text-transform:uppercase;letter-spacing:1px;box-shadow:0 0 30px rgba(0,255,65,0.4),0 0 60px rgba(0,255,65,0.15);animation:pulse-glow 2s ease-in-out infinite;transition:transform .2s ease}
+.btn-challenge:hover{transform:scale(1.06)}.btn-challenge:active{transform:scale(.97)}
+@keyframes pulse-glow{0%,100%{box-shadow:0 0 30px rgba(0,255,65,0.4),0 0 60px rgba(0,255,65,0.15)}50%{box-shadow:0 0 50px rgba(0,255,65,0.6),0 0 100px rgba(0,255,65,0.3)}}
+.quiz-container{max-width:650px;width:100%;margin:0 auto;display:flex;flex-direction:column;align-items:center;padding:20px 0;justify-content:center}
+.quiz-header{width:100%;text-align:center;margin-bottom:16px}
+.quiz-header h2{font-size:26px;font-weight:700;margin-bottom:8px;letter-spacing:1px}
+.quiz-header.history h2{color:#ff6b6b;text-shadow:0 0 20px rgba(255,107,107,0.4)}
+.quiz-header.geography h2{color:#4ecdc4;text-shadow:0 0 20px rgba(78,205,196,0.4)}
+.progress-wrapper{width:100%;display:flex;align-items:center;gap:12px;margin-bottom:6px}
+.progress-bar-bg{flex:1;height:8px;background:rgba(255,255,255,0.1);border-radius:4px;overflow:hidden}
+.progress-bar-fill{height:100%;border-radius:4px;transition:width .4s ease}
+.progress-bar-fill.history{background:linear-gradient(90deg,#ff6b6b,#ff8e8e)}
+.progress-bar-fill.geography{background:linear-gradient(90deg,#4ecdc4,#7ee8e0)}
+.progress-text{font-size:14px;font-weight:600;color:rgba(255,255,255,0.7);min-width:45px;text-align:right}
+.score-display{font-size:14px;font-weight:600;color:rgba(255,255,255,0.6);margin-bottom:20px}
+.timer-wrapper{position:relative;width:70px;height:70px;margin-bottom:20px}
+.timer-svg{width:70px;height:70px;transform:rotate(-90deg)}
+.timer-circle-bg{fill:none;stroke:rgba(255,255,255,0.1);stroke-width:4}
+.timer-circle-fg{fill:none;stroke-width:4;stroke-linecap:round;transition:stroke-dashoffset 1s linear,stroke .3s ease}
+.timer-circle-fg.history{stroke:#ff6b6b}.timer-circle-fg.geography{stroke:#4ecdc4}
+.timer-circle-fg.warning{stroke:#ffcc00!important}.timer-circle-fg.danger{stroke:#ff4444!important}
+.timer-text{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:22px;font-weight:700}
+.timer-text.warning{color:#ffcc00}.timer-text.danger{color:#ff4444;animation:shake-timer .3s ease-in-out infinite}
+@keyframes shake-timer{0%,100%{transform:translate(-50%,-50%) rotate(0)}25%{transform:translate(-50%,-50%) rotate(3deg)}75%{transform:translate(-50%,-50%) rotate(-3deg)}}
+.question-card{width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:24px;margin-bottom:20px;backdrop-filter:blur(10px)}
+.question-text{font-size:17px;font-weight:600;line-height:1.6;color:#fff}
+.options-grid{width:100%;display:flex;flex-direction:column;gap:12px}
+.option-btn{width:100%;padding:16px 20px;background:rgba(255,255,255,0.07);border:2px solid rgba(255,255,255,0.12);border-radius:14px;color:#fff;font-family:'Quicksand',sans-serif;font-size:16px;font-weight:500;text-align:left;cursor:pointer;transition:all .25s ease;position:relative;overflow:hidden}
+.option-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.1),transparent);opacity:0;transition:opacity .25s ease}
+.option-btn:hover:not(.disabled){transform:translateY(-2px) scale(1.01);border-color:rgba(255,255,255,0.3)}
+.option-btn:hover:not(.disabled)::before{opacity:1}
+.option-btn.correct{border-color:#00e676;background:rgba(0,230,118,0.2);animation:correctFlash .6s ease}
+.option-btn.wrong{border-color:#ff5252;background:rgba(255,82,82,0.2);animation:wrongShake .5s ease}
+.option-btn.reveal-correct{border-color:#00e676;background:rgba(0,230,118,0.15)}
+.option-btn.disabled{cursor:default;opacity:.7}
+@keyframes correctFlash{0%{box-shadow:0 0 0 0 rgba(0,230,118,0.6)}50%{box-shadow:0 0 30px 10px rgba(0,230,118,0.3)}100%{box-shadow:0 0 15px 3px rgba(0,230,118,0.15)}}
+@keyframes wrongShake{0%,100%{transform:translateX(0)}15%{transform:translateX(-8px)}30%{transform:translateX(8px)}45%{transform:translateX(-6px)}60%{transform:translateX(6px)}75%{transform:translateX(-3px)}90%{transform:translateX(3px)}}
+#transitionScreen{text-align:center}
+.transition-content{max-width:500px}
+.transition-title{font-size:32px;font-weight:700;color:#ff6b6b;margin-bottom:20px;text-shadow:0 0 30px rgba(255,107,107,0.4)}
+.transition-score{font-size:72px;font-weight:700;margin:20px 0;opacity:0;transform:scale(0.5);transition:all .8s cubic-bezier(0.175,0.885,0.32,1.275)}
+.transition-score.revealed{opacity:1;transform:scale(1)}
+.transition-score .score-num{color:#ff6b6b}.transition-score .score-total{color:rgba(255,255,255,0.5);font-size:36px}
+.transition-subtitle{font-size:20px;font-weight:600;margin:10px 0 6px;color:#4ecdc4}
+.transition-hint{font-size:16px;color:rgba(255,255,255,0.6);margin-bottom:30px}
+.btn-next-round{padding:16px 40px;font-family:'Quicksand',sans-serif;font-size:18px;font-weight:700;color:#0a0a2e;background:linear-gradient(135deg,#4ecdc4,#44b8b0);border:none;border-radius:50px;cursor:pointer;box-shadow:0 0 30px rgba(78,205,196,0.4);animation:pulse-teal 2s ease-in-out infinite;transition:transform .2s ease}
+.btn-next-round:hover{transform:scale(1.06)}.btn-next-round:active{transform:scale(.97)}
+@keyframes pulse-teal{0%,100%{box-shadow:0 0 30px rgba(78,205,196,0.4)}50%{box-shadow:0 0 50px rgba(78,205,196,0.6)}}
+#resultsScreen{text-align:center}
+.results-content{max-width:550px;width:100%}
+.results-title{font-size:28px;font-weight:700;margin-bottom:30px;color:#ffd700;text-shadow:0 0 20px rgba(255,215,0,0.4)}
+.bar-chart{width:100%;margin-bottom:30px}
+.bar-item{margin-bottom:20px;text-align:left}
+.bar-label{display:flex;justify-content:space-between;margin-bottom:8px;font-weight:600;font-size:16px}
+.bar-label .bar-score{font-weight:700;font-size:20px}
+.bar-track{height:36px;background:rgba(255,255,255,0.08);border-radius:18px;overflow:hidden;position:relative}
+.bar-fill{height:100%;border-radius:18px;width:0;transition:width 1.5s cubic-bezier(0.25,0.46,0.45,0.94);display:flex;align-items:center;justify-content:flex-end;padding-right:12px;font-weight:700;font-size:14px;min-width:0}
+.bar-fill.history{background:linear-gradient(90deg,#ff6b6b,#ff8e8e)}
+.bar-fill.geography{background:linear-gradient(90deg,#4ecdc4,#7ee8e0);color:#0a0a2e}
+.results-comment{font-size:18px;font-weight:600;line-height:1.8;margin-bottom:30px;color:rgba(255,255,255,0.9)}
+.btn-surprise{padding:16px 36px;font-family:'Quicksand',sans-serif;font-size:17px;font-weight:700;color:#0a0a2e;background:linear-gradient(135deg,#ffd700,#ffb700);border:none;border-radius:50px;cursor:pointer;box-shadow:0 0 30px rgba(255,215,0,0.4);animation:pulse-gold 2s ease-in-out infinite;transition:transform .2s ease;display:none}
+.btn-surprise:hover{transform:scale(1.06)}
+@keyframes pulse-gold{0%,100%{box-shadow:0 0 30px rgba(255,215,0,0.4)}50%{box-shadow:0 0 50px rgba(255,215,0,0.6)}}
+#finalScreen{background:radial-gradient(ellipse at center,rgba(45,35,10,0.8) 0%,rgba(10,10,46,0.95) 70%);text-align:center;justify-content:flex-start}
+#confettiCanvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
+.final-content{position:relative;z-index:1;max-width:520px;width:100%}
+.final-line{opacity:0;transform:translateY(20px);transition:opacity .8s ease,transform .8s ease;margin-bottom:16px}
+.final-line.visible{opacity:1;transform:translateY(0)}
+.final-flower{font-size:48px;margin-bottom:10px}
+.final-text{font-size:18px;line-height:1.9;color:rgba(255,255,255,0.9);font-weight:500}
+.final-text.highlight{font-size:22px;font-weight:700;color:#ffd700;text-shadow:0 0 25px rgba(255,215,0,0.5)}
+.final-text.name-highlight{font-size:24px;font-weight:700;background:linear-gradient(90deg,#ffd700,#ff69b4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.final-ps{font-size:15px;color:rgba(255,255,255,0.55);font-style:italic;margin-top:10px}
+.final-date{font-size:28px;font-weight:700;color:#ff69b4;text-shadow:0 0 30px rgba(255,105,180,0.5);margin-top:10px}
+#cheatAlert{position:fixed;inset:0;z-index:10000;display:none;align-items:center;justify-content:center;background:rgba(10,10,46,0.9);backdrop-filter:blur(6px);padding:24px;text-align:center;cursor:pointer}
+#cheatAlert.show{display:flex}
+#cheatAlert .box{max-width:420px;border:2px solid #ff5252;border-radius:16px;padding:28px 24px;background:rgba(60,0,0,0.55);box-shadow:0 0 40px rgba(255,82,82,0.35)}
+#cheatAlert .big{font-size:26px;font-weight:700;color:#ff5252;margin-bottom:12px}
+#cheatAlert .sub{font-size:16px;line-height:1.7}
+#cheatAlert .tap{margin-top:16px;font-size:13px;color:rgba(255,255,255,0.5)}
+.screen>*{flex-shrink:0;margin-top:auto;margin-bottom:auto}
+button{touch-action:manipulation}
+button:focus-visible{outline:3px solid #fff;outline-offset:3px}
+.btn-skip{display:none;align-items:center;justify-content:center;margin:14px auto 0;padding:10px 18px;border:1px solid rgba(255,255,255,.25);border-radius:999px;background:rgba(255,255,255,.07);color:rgba(255,255,255,.85);font:600 14px Quicksand,sans-serif;cursor:pointer}
+.btn-restart{margin:14px 8px 0;padding:12px 20px;border:1px solid rgba(255,255,255,.24);border-radius:999px;background:rgba(255,255,255,.08);color:#fff;font:700 15px Quicksand,sans-serif;cursor:pointer}
+.action-row{display:flex;justify-content:center;flex-wrap:wrap;gap:8px}
+.results-note{font-size:13px;line-height:1.6;color:rgba(255,255,255,.52);margin:-14px 0 22px}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
+@media(max-width:600px){
+.screen{padding-left:14px;padding-right:14px}.quiz-container{padding:12px 0;justify-content:flex-start}.terminal-box{padding:20px}.terminal-line{font-size:13px}.quiz-header h2{font-size:22px}.question-text{font-size:15px}.option-btn{padding:14px 16px;font-size:14px}.transition-title{font-size:26px}.transition-score{font-size:56px}.transition-score .score-total{font-size:28px}.results-title{font-size:24px}.results-comment{font-size:16px}.final-text{font-size:16px}.final-text.highlight{font-size:19px}.final-text.name-highlight{font-size:20px}.final-date{font-size:24px}.btn-challenge,.btn-next-round,.btn-surprise{padding:14px 28px;font-size:16px}.timer-wrapper{width:60px;height:60px}.timer-svg{width:60px;height:60px}.timer-text{font-size:20px}
+}
+@media(max-width:380px){.terminal-line{font-size:12px}.terminal-box{padding:16px}.question-text{font-size:14px}.option-btn{font-size:13px;padding:12px 14px}}
+</style>
+</head>
+<body>
+<canvas id="bgCanvas"></canvas>
+<button id="muteBtn" onclick="toggleMute()" title="Bật/Tắt âm thanh" aria-label="Bật hoặc tắt âm thanh">🔊</button>
+
+<div id="introScreen" class="screen active">
+  <div class="terminal-box">
+    <div class="terminal-header">
+      <div class="terminal-dot r"></div>
+      <div class="terminal-dot y"></div>
+      <div class="terminal-dot g"></div>
+    </div>
+    <div id="terminalLines">
+      <div class="terminal-line" data-text="> Khởi động hệ thống ôn luyện thi..."></div>
+      <div class="terminal-line" data-text="> Đang tải hệ thống câu hỏi..."></div>
+      <div class="terminal-line" data-text="> Học sinh: Khánh Vy"></div>
+      <div class="terminal-line" data-text="> Môn thi: Lịch Sử &amp; Địa Lí"></div>
+      <div class="terminal-line" data-text="> ................................"></div>
+      <div class="terminal-line" data-text="> ⚠ LƯU Ý: KHÔNG được Google,"></div>
+      <div class="terminal-line" data-text=">   KHÔNG được hỏi ai,"></div>
+      <div class="terminal-line" data-text=">   làm bài NGHIÊM TÚC nhé! 😤"></div>
+      <div class="terminal-line" data-text="> Sẵn sàng chưa?"></div>
+    </div>
+    <button class="btn-challenge" id="btnChallenge" onclick="startQuiz()">📝 BẮT ĐẦU LÀM BÀI</button>
+    <button class="btn-skip" id="btnSkipIntro" onclick="skipIntro()" aria-label="Bỏ qua hiệu ứng giới thiệu">Bỏ qua hiệu ứng giới thiệu ↗</button>
+  </div>
+</div>
+
+<div id="historyScreen" class="screen">
+  <div class="quiz-container">
+    <div class="quiz-header history"><h2>ROUND 1: LỊCH SỬ 📜</h2></div>
+    <div class="progress-wrapper">
+      <div class="progress-bar-bg"><div class="progress-bar-fill history" id="historyProgress" style="width:10%"></div></div>
+      <span class="progress-text" id="historyProgressText">1/10</span>
+    </div>
+    <div class="score-display" id="historyScoreDisplay">Điểm: 0</div>
+    <div class="timer-wrapper">
+      <svg class="timer-svg" viewBox="0 0 70 70">
+        <circle class="timer-circle-bg" cx="35" cy="35" r="30"></circle>
+        <circle class="timer-circle-fg history" id="historyTimerCircle" cx="35" cy="35" r="30" stroke-dasharray="188.5" stroke-dashoffset="0"></circle>
+      </svg>
+      <span class="timer-text" id="historyTimerText">20</span>
+    </div>
+    <div class="question-card"><p class="question-text" id="historyQuestion"></p></div>
+    <div class="options-grid" id="historyOptions"></div>
+  </div>
+</div>
+
+<div id="transitionScreen" class="screen">
+  <div class="transition-content">
+    <h2 class="transition-title">ROUND 1 HOÀN TẤT! 🏁</h2>
+    <p style="font-size:18px;color:rgba(255,255,255,0.7);margin-bottom:10px">Điểm Lịch Sử của em:</p>
+    <div class="transition-score" id="transitionScore">
+      <span class="score-num" id="transScoreNum">0</span><span class="score-total">/10</span>
+    </div>
+    <p class="transition-subtitle">Chuẩn bị cho Round 2: ĐỊA LÍ 🌍</p>
+    <p class="transition-hint">(Đừng lo, round này sẽ dễ hơn... RẤT NHIỀU 😏)</p>
+    <button class="btn-next-round" id="btnNextRound" onclick="startGeography()">BẮT ĐẦU ROUND 2</button>
+  </div>
+</div>
+
+<div id="geographyScreen" class="screen">
+  <div class="quiz-container">
+    <div class="quiz-header geography"><h2>ROUND 2: ĐỊA LÍ 🌍</h2></div>
+    <div class="progress-wrapper">
+      <div class="progress-bar-bg"><div class="progress-bar-fill geography" id="geoProgress" style="width:10%"></div></div>
+      <span class="progress-text" id="geoProgressText">1/10</span>
+    </div>
+    <div class="score-display" id="geoScoreDisplay">Điểm: 0</div>
+    <div class="timer-wrapper">
+      <svg class="timer-svg" viewBox="0 0 70 70">
+        <circle class="timer-circle-bg" cx="35" cy="35" r="30"></circle>
+        <circle class="timer-circle-fg geography" id="geoTimerCircle" cx="35" cy="35" r="30" stroke-dasharray="188.5" stroke-dashoffset="0"></circle>
+      </svg>
+      <span class="timer-text" id="geoTimerText">20</span>
+    </div>
+    <div class="question-card"><p class="question-text" id="geoQuestion"></p></div>
+    <div class="options-grid" id="geoOptions"></div>
+  </div>
+</div>
+
+<div id="resultsScreen" class="screen">
+  <div class="results-content">
+    <h2 class="results-title">📊 KẾT QUẢ THỬ THÁCH</h2>
+    <div class="bar-chart">
+      <div class="bar-item">
+        <div class="bar-label"><span>📜 Lịch Sử</span><span class="bar-score" id="resultHistoryScore">0/10</span></div>
+        <div class="bar-track"><div class="bar-fill history" id="historyBar"></div></div>
+      </div>
+      <div class="bar-item">
+        <div class="bar-label"><span>🌍 Địa Lí</span><span class="bar-score" id="resultGeoScore">0/10</span></div>
+        <div class="bar-track"><div class="bar-fill geography" id="geoBar"></div></div>
+      </div>
+    </div>
+    <p class="results-comment" id="resultsComment" aria-live="polite"></p>
+    <p class="results-note">Bài làm được chấm ngay trên thiết bị này. Rời tab không bị trừ điểm (có thể do thông báo hoặc cuộc gọi), nhưng đồng hồ vẫn chạy nhé.</p>
+    <div class="action-row"><button class="btn-surprise" id="btnSurprise" onclick="showFinal()">Tiếp tục xem lời chúc →</button><button class="btn-restart" id="btnRestartResults" onclick="restartQuiz()" style="display:none">↻ Chơi lại</button></div>
+  </div>
+</div>
+
+<div id="finalScreen" class="screen">
+  <canvas id="confettiCanvas"></canvas>
+  <div class="final-content">
+    <div class="final-line"><span class="final-flower">🌸</span></div>
+    <div class="final-line"><p class="final-text highlight">Nhưng mà...</p></div>
+    <div class="final-line"><p class="final-text">Dù Sử có khó hơn Địa bao nhiêu đi nữa,<br>dù điểm thi có "toang" thế nào...</p></div>
+    <div class="final-line"><p class="final-text name-highlight">Thì hôm nay Khánh Vy vẫn là người thắng cuộc,<br>vì là 20/10 mà =))</p></div>
+    <div class="final-line"><p class="final-text">Chúc em ngày Phụ nữ Việt Nam 20/10<br>thật nhiều niềm vui, thật nhiều năng lượng,<br>và cứ tỏa sáng theo cách của em nha~ ✨</p></div>
+    <div class="final-line"><p class="final-ps">(P/S: Nhưng ôn lại Sử đi em, điểm đáng lo lắm đó 😜)</p></div>
+    <div class="final-line"><p class="final-date">💛 Happy 20/10/2026</p></div>
+    <div class="final-line"><button class="btn-restart" onclick="restartQuiz(true)">↻ Chơi lại từ đầu</button></div>
+  </div>
+</div>
+
+<div id="cheatAlert" onclick="closeCheat()"><div class="box"><div class="big" id="cheatTitle"></div><p class="sub" id="cheatSub"></p><p class="tap">(chạm để quay lại làm bài)</p></div></div>
+
+<script>
+const historyQuestions=[
+{q:"Điểm khác biệt mang tính bản chất giữa bản Tuyên ngôn Độc lập (1945) của Chủ tịch Hồ Chí Minh so với bản Tuyên ngôn Độc lập (1776) của nước Mỹ và bản Tuyên ngôn Nhân quyền và Dân quyền (1789) của nước Pháp là",opts:["Khẳng định quyền bình đẳng và quyền sống của mọi cá nhân trong xã hội tư bản", "Nâng quyền tự nhiên của con người cá nhân lên thành quyền tự quyết, độc lập của cả một dân tộc", "Tố cáo tội ác xâm lược của chủ nghĩa phát xít đối với nền hòa bình thế giới", "Đặt quyền lợi giai cấp công - nông lên trên quyền lợi của giai cấp tư sản dân tộc"],ans:1},
+{q:"Nghệ thuật quân sự \"đánh điểm, diệt viện\" của quân đội Việt Nam được hoàn thiện và phát triển lên đỉnh cao nhất trong chiến dịch nào ở thời kỳ kháng chiến chống Pháp?",opts:["Chiến dịch Biên giới thu - đông 1950", "Chiến dịch Hòa Bình đông - xuân 1951 - 1952", "Chiến dịch Điện Biên Phủ năm 1954", "Chiến dịch Thượng Lào năm 1953"],ans:0},
+{q:"Nhận định nào sau đây phản ánh không chính xác tính chất và tác động của cuộc Khủng hoảng tên lửa Cuba (10/1962) đối với quan hệ Xô - Mỹ trong Chiến tranh Lạnh?",opts:["Đẩy nhân loại đến bờ vực của một cuộc chiến tranh hạt nhân hủy diệt thực sự", "Khiến hai siêu cường nhận thức rõ giới hạn của sự đối đầu và thiết lập đường dây nóng Moscow - Washington", "Mở đầu cho xu thế hòa hoãn Đông - Tây và giải trừ hoàn toàn các hiệp ước phòng thủ tên lửa", "Buộc Mỹ phải cam kết không tấn công Cuba để đổi lấy việc Liên Xô rút tên lửa khỏi hòn đảo này"],ans:2},
+{q:"Điểm giống nhau căn bản giữa chiến lược \"Chiến tranh đặc biệt\" (1961 - 1965) và \"Chiến tranh cục bộ\" (1965 - 1968) của Mỹ ở miền Nam Việt Nam là",opts:["Đều dựa vào sức mạnh quân viễn chinh Mỹ đóng vai trò nòng cốt trên chiến trường", "Đều là loại hình chiến tranh xâm lược thực dân mới, nằm trong chiến lược toàn cầu \"Phản ứng linh hoạt\"", "Đều mở rộng chiến tranh phá hoại bằng không quân và hải quân ra toàn miền Bắc ngay từ khi bắt đầu", "Đều lấy mục tiêu bình định miền Nam trong vòng 18 tháng làm tư tưởng tác chiến cốt lõi"],ans:1},
+{q:"Yếu tố then chốt nhất tạo nên sự chuyển biến về chất của phong trào công nhân Việt Nam trong giai đoạn 1925 - 1930 (từ tự phát sang tự giác) là",opts:["Sự ra đời của tổ chức Công hội đỏ do Tôn Đức Thắng thành lập tại Sài Gòn", "Việc thực hiện phong trào \"vô sản hóa\" (1928) đưa cán bộ truyền bá chủ nghĩa Mác - Lênin vào nhà máy", "Phong trào bãi công nổ ra đồng loạt ở các trung tâm công nghiệp lớn như Hà Nội, Hải Phòng, Nam Định", "Sự liên minh tự nhiên giữa giai cấp công nhân với giai cấp nông dân trên mặt trận đấu tranh kinh tế"],ans:1},
+{q:"Điểm tương đồng mang tính quy luật giữa cuộc Tổng khởi nghĩa tháng Tám năm 1945 và cuộc Tổng tiến công và nổi dậy Xuân 1975 ở Việt Nam là",opts:["Lực lượng chính trị quần chúng giữ vai trò quyết định thắng lợi trên toàn chiến trường", "Đi từ khởi nghĩa từng phần ở nông thôn rồi bao vây, tiến công dứt điểm các đô thị đầu não", "Kết hợp chặt chẽ giữa đòn tiến công quân sự với nổi dậy chính trị của quần chúng nhân dân", "Giành thắng lợi hoàn toàn nhờ việc chớp đúng thời cơ khách quan thuận lợi khi đối phương đầu hàng"],ans:2},
+{q:"Thắng lợi nào của quân dân miền Nam đã giáng đòn quyết định làm phá sản chiến lược \"Việt Nam hóa chiến tranh\", buộc Mỹ phải ký kết Hiệp định Pari năm 1973?",opts:["Cuộc Tiến công chiến lược năm 1972 trên toàn chiến trường miền Nam kết hợp trận \"Điện Biên Phủ trên không\"", "Thắng lợi vang dội trong chiến dịch Đường 9 - Nam Lào (1971)", "Chiến thắng Vạn Tường (8/1965) và hai mùa khô 1965 - 1967", "Cuộc Tổng tiến công và nổi dậy Tết Mậu Thân năm 1968"],ans:0},
+{q:"Điểm sáng tạo lớn nhất của Hội nghị Ban Chấp hành Trung ương Đảng Cộng sản Đông Dương lần thứ 8 (tháng 5/1941) so với Cương lĩnh chính trị đầu tiên (đầu năm 1930) là",opts:["Tạm gác khẩu hiệu \"cách mạng thổ địa\", giải quyết vấn đề dân tộc trong khuôn khổ từng nước ở Đông Dương", "Đặt nhiệm vụ chống đế quốc và chống phong kiến ngang hàng nhau để tập hợp lực lượng cách mạng", "Xác định giai cấp nông dân là động lực duy nhất quyết định thành công của cuộc cách mạng giải phóng", "Chuyển từ đấu tranh vũ trang bí mật sang đấu tranh công khai, hợp pháp, nửa hợp pháp"],ans:0},
+{q:"Nhận định nào phản ánh đúng và sâu sắc nhất về mối quan hệ giữa đấu tranh quân sự và đấu tranh ngoại giao trong cuộc kháng chiến chống Mỹ, cứu nước (1954 - 1975)?",opts:["Mặt trận ngoại giao luôn giữ vai trò quyết định, chi phối tuyệt đối diễn biến tác chiến trên thực địa", "Ngoại giao chỉ là hình thức hợp thức hóa các kết quả tác chiến đã đạt được sau khi chiến sự chấm dứt", "Thắng lợi quân sự tạo cơ sở thực tế cho đàm phán ngoại giao, trong khi ngoại giao phát huy kết quả quân sự và mở ra cục diện mới", "Đấu tranh quân sự và ngoại giao tiến hành hoàn toàn độc lập nhằm phân tán sự chú ý chiến lược của đối phương"],ans:2},
+{q:"Hạn chế lớn nhất mang tính lịch sử của xu thế toàn cầu hóa đối với các quốc gia đang phát triển là",opts:["Ngăn cản quá trình chuyển giao công nghệ kỹ thuật cao từ các nước phát triển", "Nguy cơ đánh mất bản sắc văn hóa dân tộc, gia tăng phụ thuộc kinh tế và đào sâu hố phân hóa giàu - nghèo", "Triệt tiêu hoàn toàn quyền tự chủ về đường lối chính trị của các nước nhỏ", "Khiến các nước này không thể tham gia vào các chuỗi cung ứng thương mại quốc tế"],ans:1}
+];
+
+const geoQuestions=[
+{q:"Đất nước Việt Nam trên bản đồ thế giới có hình dạng giống chữ cái nào nhất?",opts:["Chữ S", "Chữ O", "Chữ X", "Chữ Z"],ans:0},
+{q:"Biển bao bọc phía Đông và phía Nam phần đất liền nước ta có tên gọi là gì?",opts:["Biển Đỏ", "Biển Chết", "Biển Đông", "Biển Đen"],ans:2},
+{q:"Khí hậu Việt Nam quanh năm có nền nhiệt cao và chan hòa ánh nắng do nằm trong đới khí hậu nào?",opts:["Hàn đới (đới lạnh, quanh năm đóng băng)", "Ôn đới (có mùa đông tuyết rơi dày)", "Nhiệt đới (nhiệt đới ẩm gió mùa)", "Cận cực"],ans:2},
+{q:"Sông Mê Kông khi chảy vào phần lãnh thổ phía Nam nước ta đổ ra biển qua nhiều cửa nên còn được gọi dân dã là",opts:["Sông Hồng", "Sông Cửu Long (chín con rồng)", "Sông Nile", "Sông Amazon"],ans:1},
+{q:"Đỉnh núi Phanxipăng được mệnh danh là \"nóc nhà Đông Dương\" vì đây là",opts:["Ngọn núi thấp nhất khu vực", "Đỉnh núi cao nhất ba nước Việt Nam, Lào, Campuchia", "Ngọn núi lửa đang hoạt động mạnh nhất", "Hòn đảo đá ngầm ngoài biển khơi"],ans:1},
+{q:"Nước ta có đường bờ biển dài uốn lượn khoảng bao nhiêu km?",opts:["32,6 km (ngắn hơn một vòng xe máy dạo phố)", "326 km", "3.260 km", "32.600 km (gần bằng một vòng Trái Đất)"],ans:2},
+{q:"Hai vựa lúa lớn nhất, cung cấp lương thực chủ yếu cho cả nước và xuất khẩu là",opts:["Đồng bằng sông Hồng và đồng bằng sông Cửu Long", "Sa mạc Sahara và hoang mạc Gobi", "Dãy Hoàng Liên Sơn và cao nguyên Lâm Viên", "Quần đảo Hoàng Sa và Trường Sa"],ans:0},
+{q:"Cây cà phê, cao su, hồ tiêu ở nước ta phát triển mạnh nhất trên loại đất màu mỡ nào sau đây?",opts:["Đất cát trắng ven biển", "Đất bazan màu mỡ trên vùng đồi núi/cao nguyên", "Đất băng giá vĩnh cửu", "Đất sét đầm lầy ngập mặn quanh năm"],ans:1},
+{q:"Hiện tượng thời tiết nào sau đây không bao giờ xảy ra trên vùng đồng bằng ngập nước Nam Bộ nước ta?",opts:["Nắng nóng mùa khô", "Mưa rào nhiệt đới", "Bão tuyết và sông hồ đóng băng dày đặc", "Triều cường dâng cao gây ngập đường phố"],ans:2},
+{q:"Hai quần đảo lớn thuộc chủ quyền thiêng liêng ngoài khơi xa của Tổ quốc Việt Nam là",opts:["Hawaii và Maldives", "Hoàng Sa và Trường Sa", "Phú Quốc và Cát Bà", "Côn Đảo và Lý Sơn"],ans:1}
+];
+
+function shuffleQ(q){const o=[0,1,2,3];for(let i=3;i>0;i--){const j=Math.floor(Math.random()*(i+1));[o[i],o[j]]=[o[j],o[i]]}return{q:q.q,opts:o.map(i=>q.opts[i]),ans:o.indexOf(q.ans)}}
+[historyQuestions,geoQuestions].forEach((a)=>{a.forEach((q,i)=>{if(!q||!Array.isArray(q.opts)||q.opts.length!==4||!Number.isInteger(q.ans)||q.ans<0||q.ans>=q.opts.length)throw new Error('Dữ liệu câu hỏi không hợp lệ tại câu '+(i+1));a[i]=shuffleQ(q)})});
+
+/* Audio Engine */
+let audioCtx=null,isMuted=false;
+function getAudioCtx(){const Ctx=window.AudioContext||window.webkitAudioContext;if(!Ctx)return null;if(!audioCtx)audioCtx=new Ctx();if(audioCtx.state==='suspended')audioCtx.resume().catch(()=>{});return audioCtx}
+function toggleMute(){isMuted=!isMuted;document.getElementById('muteBtn').textContent=isMuted?'🔇':'🔊';document.getElementById('muteBtn').classList.toggle('muted',isMuted)}
+function playTone(freq,dur,type='sine',vol=0.15){if(isMuted)return;try{const c=getAudioCtx();if(!c)return;const o=c.createOscillator(),g=c.createGain();o.type=type;o.frequency.setValueAtTime(freq,c.currentTime);g.gain.setValueAtTime(vol,c.currentTime);g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+dur);o.connect(g);g.connect(c.destination);o.start(c.currentTime);o.stop(c.currentTime+dur)}catch(e){}}
+function playTypingClick(){playTone(800+Math.random()*400,0.03,'square',0.04)}
+function playCorrect(){playTone(523,0.12,'sine',0.15);setTimeout(()=>playTone(659,0.12,'sine',0.15),100);setTimeout(()=>playTone(784,0.2,'sine',0.15),200)}
+function playWrong(){playTone(200,0.15,'sawtooth',0.12);setTimeout(()=>playTone(160,0.25,'sawtooth',0.12),120)}
+function playTimerWarning(){playTone(880,0.08,'square',0.08)}
+function playCelebration(){[523,587,659,698,784,880,988,1047].forEach((n,i)=>setTimeout(()=>playTone(n,0.15,'sine',0.1),i*80))}
+function playTimeUp(){playTone(300,0.3,'sawtooth',0.1);setTimeout(()=>playTone(200,0.4,'sawtooth',0.1),200)}
+
+/* Background Canvas */
+const bgCanvas=document.getElementById('bgCanvas'),bgCtx=bgCanvas.getContext('2d');
+let bgMode='matrix',particles=[],matrixColumns=[],matrixFontSize=14;
+function resizeBgCanvas(){bgCanvas.width=window.innerWidth;bgCanvas.height=window.innerHeight;initMatrix()}
+function initMatrix(){const cols=Math.floor(bgCanvas.width/matrixFontSize);matrixColumns=[];for(let i=0;i<cols;i++)matrixColumns.push(Math.random()*bgCanvas.height/matrixFontSize)}
+function drawMatrix(){bgCtx.fillStyle='rgba(10,10,46,0.06)';bgCtx.fillRect(0,0,bgCanvas.width,bgCanvas.height);bgCtx.fillStyle='rgba(0,255,65,0.12)';bgCtx.font=matrixFontSize+'px monospace';const chars='01アイウエオカキクケコ♦◇◆■□';for(let i=0;i<matrixColumns.length;i++){const ch=chars[Math.floor(Math.random()*chars.length)];bgCtx.fillText(ch,i*matrixFontSize,matrixColumns[i]*matrixFontSize);if(matrixColumns[i]*matrixFontSize>bgCanvas.height&&Math.random()>0.975)matrixColumns[i]=0;matrixColumns[i]++}}
+function initParticles(c1='#ff6b6b',c2='#4ecdc4',count=40){particles=[];for(let i=0;i<count;i++)particles.push({x:Math.random()*bgCanvas.width,y:Math.random()*bgCanvas.height,r:Math.random()*3+1,vx:(Math.random()-0.5)*0.5,vy:(Math.random()-0.5)*0.5,color:Math.random()>0.5?c1:c2,alpha:Math.random()*0.4+0.1})}
+function drawParticles(){bgCtx.fillStyle='rgba(10,10,46,0.15)';bgCtx.fillRect(0,0,bgCanvas.width,bgCanvas.height);for(const p of particles){p.x+=p.vx;p.y+=p.vy;if(p.x<0)p.x=bgCanvas.width;if(p.x>bgCanvas.width)p.x=0;if(p.y<0)p.y=bgCanvas.height;if(p.y>bgCanvas.height)p.y=0;bgCtx.beginPath();bgCtx.arc(p.x,p.y,p.r,0,Math.PI*2);bgCtx.fillStyle=p.color;bgCtx.globalAlpha=p.alpha;bgCtx.fill()}bgCtx.globalAlpha=1}
+function drawGolden(){bgCtx.fillStyle='rgba(10,10,46,0.08)';bgCtx.fillRect(0,0,bgCanvas.width,bgCanvas.height);for(const p of particles){p.x+=p.vx;p.y+=p.vy;p.alpha+=(Math.random()-0.5)*0.01;p.alpha=Math.max(0.05,Math.min(0.5,p.alpha));if(p.x<-10)p.x=bgCanvas.width+10;if(p.x>bgCanvas.width+10)p.x=-10;if(p.y<-10)p.y=bgCanvas.height+10;if(p.y>bgCanvas.height+10)p.y=-10;bgCtx.beginPath();bgCtx.arc(p.x,p.y,p.r,0,Math.PI*2);bgCtx.fillStyle=p.color;bgCtx.globalAlpha=p.alpha;bgCtx.fill()}bgCtx.globalAlpha=1}
+function bgLoop(){if(!document.hidden){if(bgMode==='matrix')drawMatrix();else if(bgMode==='particles')drawParticles();else if(bgMode==='golden')drawGolden()}requestAnimationFrame(bgLoop)}
+window.addEventListener('resize',resizeBgCanvas);resizeBgCanvas();bgLoop();
+
+/* Confetti Canvas */
+const confettiCanvas=document.getElementById('confettiCanvas'),confettiCtx=confettiCanvas.getContext('2d');
+let confettiPieces=[],confettiActive=false;
+function resizeConfetti(){confettiCanvas.width=window.innerWidth;confettiCanvas.height=window.innerHeight;confettiCanvas.style.width=window.innerWidth+'px';confettiCanvas.style.height=window.innerHeight+'px';confettiCtx.setTransform(1,0,0,1,0,0)}
+window.addEventListener('resize',resizeConfetti);resizeConfetti();
+function startConfetti(){confettiPieces=[];confettiActive=true;const colors=['#ffd700','#ff69b4','#ff6b6b','#4ecdc4','#fff','#ffb700','#f0e68c'];for(let i=0;i<150;i++)confettiPieces.push({x:Math.random()*confettiCanvas.width,y:Math.random()*confettiCanvas.height-confettiCanvas.height,w:Math.random()*10+5,h:Math.random()*6+3,color:colors[Math.floor(Math.random()*colors.length)],vy:Math.random()*2+1,vx:(Math.random()-0.5)*2,rot:Math.random()*360,rotSpeed:(Math.random()-0.5)*8,alpha:Math.random()*0.5+0.5});confettiLoop()}
+function confettiLoop(){if(!confettiActive)return;if(document.hidden){requestAnimationFrame(confettiLoop);return}confettiCtx.clearRect(0,0,window.innerWidth,window.innerHeight);for(const c of confettiPieces){c.y+=c.vy;c.x+=c.vx;c.rot+=c.rotSpeed;if(c.y>confettiCanvas.height+20){c.y=-20;c.x=Math.random()*confettiCanvas.width}confettiCtx.save();confettiCtx.translate(c.x,c.y);confettiCtx.rotate(c.rot*Math.PI/180);confettiCtx.globalAlpha=c.alpha;confettiCtx.fillStyle=c.color;confettiCtx.fillRect(-c.w/2,-c.h/2,c.w,c.h);confettiCtx.restore()}requestAnimationFrame(confettiLoop)}
+
+/* Screen Management */
+let screenChangeId=0;function showScreen(id){const changeId=++screenChangeId;document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));setTimeout(()=>{if(changeId===screenChangeId){const target=document.getElementById(id);if(target)target.classList.add('active')}},40)}
+
+/* Terminal Typing */
+let terminalRunId=0;
+async function runTerminal(){const runId=++terminalRunId;const lines=document.querySelectorAll('#terminalLines .terminal-line');for(let i=0;i<lines.length;i++){if(runId!==terminalRunId)return;const line=lines[i],text=line.getAttribute('data-text')||'';line.classList.add('visible');line.textContent='';for(let j=0;j<text.length;j++){if(runId!==terminalRunId)return;line.textContent=text.substring(0,j+1);if(j%3===0)playTypingClick();await sleep(18+Math.random()*18)}line.textContent=text;await sleep(140)}if(runId===terminalRunId)document.getElementById('btnChallenge').style.display='block'}
+function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
+function skipIntro(){terminalRunId++;document.querySelectorAll('#terminalLines .terminal-line').forEach(line=>{line.classList.add('visible');line.textContent=line.getAttribute('data-text')||''});document.getElementById('btnChallenge').style.display='block'}
+window.addEventListener('load',()=>setTimeout(runTerminal,250));
+
+/* Quiz Engine */
+let historyScore=0,geoScore=0,currentQuestion=0,timerInterval=null,timeLeft=20,isAnswering=false;
+let hasReplayed=false;
+let activeQuizType=null,quizRunning=false,cheatCount=0,pendingCheat=false;
+function clearQuizTimer(){if(timerInterval){clearInterval(timerInterval);timerInterval=null}}
+function startQuiz(){clearQuizTimer();cheatCount=0;pendingCheat=false;quizRunning=true;activeQuizType='history';getAudioCtx();bgMode='particles';initParticles('#ff6b6b','#ff8e8e',35);historyScore=0;geoScore=0;currentQuestion=0;document.getElementById('transitionScore').classList.remove('revealed');showScreen('historyScreen');setTimeout(()=>{if(quizRunning&&activeQuizType==='history')loadQuestion('history')},250)}
+function startGeography(){clearQuizTimer();quizRunning=true;activeQuizType='geography';initParticles('#4ecdc4','#7ee8e0',35);geoScore=0;currentQuestion=0;showScreen('geographyScreen');setTimeout(()=>{if(quizRunning&&activeQuizType==='geography')loadQuestion('geography')},250)}
+function loadQuestion(type){const questions=type==='history'?historyQuestions:geoQuestions;if(currentQuestion<0||currentQuestion>=questions.length)return;const q=questions[currentQuestion],prefix=type==='history'?'history':'geo';const pct=((currentQuestion+1)/questions.length)*100;document.getElementById(prefix+'Progress').style.width=pct+'%';document.getElementById(prefix+'ProgressText').textContent=(currentQuestion+1)+'/'+questions.length;document.getElementById(prefix+'ScoreDisplay').textContent='Điểm: '+(type==='history'?historyScore:geoScore);document.getElementById(type==='history'?'historyQuestion':'geoQuestion').textContent=q.q;const optC=document.getElementById(prefix+'Options');optC.replaceChildren();const labels=['A','B','C','D'];q.opts.forEach((opt,i)=>{const btn=document.createElement('button');btn.type='button';btn.className='option-btn';btn.textContent=labels[i]+'. '+opt;btn.setAttribute('aria-label','Đáp án '+labels[i]+': '+opt);btn.onclick=()=>selectAnswer(type,i);optC.appendChild(btn)});isAnswering=false;startTimer(type,true)}
+function startTimer(type,reset=true){clearQuizTimer();const prefix=type==='history'?'history':'geo',circle=document.getElementById(prefix+'TimerCircle'),text=document.getElementById(prefix+'TimerText'),circ=2*Math.PI*30,total=type==='history'?40:20;if(reset)timeLeft=total;text.textContent=timeLeft;text.className='timer-text';circle.style.strokeDashoffset=String(circ*(1-timeLeft/total));circle.className='timer-circle-fg '+(type==='history'?'history':'geography');const deadline=Date.now()+timeLeft*1000;const tick=()=>{if(!quizRunning||isAnswering)return;timeLeft=Math.max(0,Math.round((deadline-Date.now())/1000));text.textContent=timeLeft;circle.style.strokeDashoffset=String(circ*(1-timeLeft/total));circle.classList.toggle('warning',timeLeft<=10&&timeLeft>5);text.classList.toggle('warning',timeLeft<=10&&timeLeft>5);circle.classList.toggle('danger',timeLeft<=5&&timeLeft>0);text.classList.toggle('danger',timeLeft<=5&&timeLeft>0);if(timeLeft<=5&&timeLeft>0)playTimerWarning();if(timeLeft<=0){clearQuizTimer();playTimeUp();handleTimeout(type)}};timerInterval=setInterval(tick,1000)}
+function handleTimeout(type){if(isAnswering)return;isAnswering=true;const questions=type==='history'?historyQuestions:geoQuestions,q=questions[currentQuestion],prefix=type==='history'?'history':'geo',buttons=document.querySelectorAll('#'+prefix+'Options .option-btn');buttons.forEach((btn,i)=>{btn.classList.add('disabled');btn.disabled=true;if(i===q.ans)btn.classList.add('reveal-correct')});setTimeout(()=>nextQuestion(type),1200)}
+function selectAnswer(type,idx){if(isAnswering||!quizRunning)return;isAnswering=true;clearQuizTimer();const questions=type==='history'?historyQuestions:geoQuestions,q=questions[currentQuestion],prefix=type==='history'?'history':'geo',buttons=document.querySelectorAll('#'+prefix+'Options .option-btn'),isCorrect=idx===q.ans;buttons.forEach(btn=>{btn.classList.add('disabled');btn.disabled=true});if(isCorrect){buttons[idx].classList.add('correct');playCorrect();if(type==='history')historyScore++;else geoScore++;document.getElementById(prefix+'ScoreDisplay').textContent='Điểm: '+(type==='history'?historyScore:geoScore)}else{buttons[idx].classList.add('wrong');if(buttons[q.ans])buttons[q.ans].classList.add('reveal-correct');playWrong()}setTimeout(()=>nextQuestion(type),1100)}
+function nextQuestion(type){if(!quizRunning||type!==activeQuizType)return;currentQuestion++;const questions=type==='history'?historyQuestions:geoQuestions;if(currentQuestion>=questions.length){clearQuizTimer();if(type==='history')showTransition();else showResults()}else loadQuestion(type)}
+
+/* Anti-Google */
+function showCheat(){const n=cheatCount,t=document.getElementById('cheatTitle'),b=document.getElementById('cheatSub');t.textContent=n===1?'Phát hiện Google lén! 👀':n===2?'Lại nữa rồi hả?! 😤':'Lần thứ '+n+' rồi đó! 🕵️';b.innerHTML=n===1?'Em vừa rời khỏi trang làm bài.<br>KHÔNG được Google nha, làm bài NGHIÊM TÚC đi!':n===2?'Đã nhắc rồi mà vẫn lén...<br>Hệ thống ghi nhận lần '+n+' rồi đó!':'Hệ thống đã ghi lại '+n+' lần em rời tab.<br>Cuối bài sẽ tính sổ nha 😏';document.getElementById('cheatAlert').classList.add('show');playWrong()}
+function closeCheat(){document.getElementById('cheatAlert').classList.remove('show')}
+document.addEventListener('visibilitychange',()=>{if(document.hidden){if(quizRunning){cheatCount++;pendingCheat=true}}else if(pendingCheat){pendingCheat=false;showCheat()}});
+
+/* Transition */
+function showTransition(){quizRunning=false;showScreen('transitionScreen');document.getElementById('transScoreNum').textContent=historyScore;setTimeout(()=>document.getElementById('transitionScore').classList.add('revealed'),500)}
+
+/* Results */
+function cheatNote(){
+  const t=historyScore+geoScore,c=cheatCount;
+  if(c===0) return t>=18?' Mà hệ thống xác nhận: không rời tab lần nào, chơi sạch 👏':'';
+  if(c===1) return t>=16?' Nhưng điểm cao mà rời tab 1 lần... nghi lắm nha 🤨':' À mà em rời tab 1 lần đó, Google lén hả? 👀';
+  if(c<=3) return ' Em rời tab '+c+' lần! '+(t>=14?'Điểm cao vậy... đúng là có Google rồi 🤨':'Google lén mà vẫn không ăn thua hả? 😂');
+  return ' Em rời tab tận '+c+' lần?! Chắc Google cả bài luôn rồi 😤🕵️';
+}
+function getResultsComment(){
+  const h=historyScore,g=geoScore,d=Math.abs(h-g);let m;
+  if(h===10&&g===10) m='Em... em hack hả?! Làm gì mà đúng hết vậy 🤖';
+  else if(h===0&&g===0) m='Em ơi... cả hai môn đều 0 điểm... Em có thật sự đi học không vậy:)) 😭';
+  else if(h===g){
+    if(h<=4) m='Hai môn bằng điểm nhau, mà cùng thấp luôn... Em cân bằng thật, cân bằng ở dưới đáy 😭';
+    else if(h<=7) m='Hai môn bằng điểm nhau?! Em cân bằng ghê 😳 Nhưng câu Địa dễ hơn câu Sử nhiều mà điểm bằng nhau thì... Sử vẫn khó hơn nhé! 😤';
+    else m='Hai môn bằng điểm nhau, mà còn cao nữa chứ 😳 Nhưng Sử vẫn khó hơn Địa nhiều nhé! 😤';
+  } else if(h>g){
+    if(g===0) m='Sử được điểm mà Địa 0?! Câu Địa dễ vậy mà... em cố tình đúng hg? 🫨😂';
+    else if(h===10) m='Sử 10/10 luôn?! Thôi thua em rồi... Nhưng Địa dễ vậy mà còn sai '+(10-g)+' câu thì hơi... Địa vẫn dễ hơn Sử nhé👌';
+    else if(d>=5) m='Ơ KHOAN... Sử hơn Địa tận '+d+' điểm?! 🫨 Lạ thật... Địa vẫn dễ hơn Sử nhé👌';
+    else m='Ơ KHOAN... em làm Sử ĐIỂM CAO hơn Địa?! 🫨 Thôi thua em rồi, không cãi được nữa... Nhưng mà Địa vẫn dễ hơn Sử nhé👌';
+  } else {
+    if(h===0) m='Sử 0 điểm luôn?! Thấy chưa, LỊCH SỬ KHÓ MÀ! 😤 (Nhưng 0 điểm thì cũng hơi quá nha... 😭)';
+    else if(g===10) m='Địa 10/10 còn Sử chỉ '+h+'/10... Thấy chưa?! LỊCH SỬ khó hơn ĐỊA LÍ rõ ràng rồi nhé! 😤📜';
+    else if(d>=5) m='Thấy chưa?! LỊCH SỬ khó hơn ĐỊA LÍ GẤP MẤY LẦN rồi nhé! Chênh tận '+d+' điểm luôn! 😤📜';
+    else if(d===1) m='Địa chỉ hơn Sử đúng 1 điểm thôi... mà Địa dễ hơn cả núi, vậy là Sử vẫn khó hơn nhé! 😤📜';
+    else m='Thấy chưa?! LỊCH SỬ khó hơn ĐỊA LÍ bao nhiêu rồi nhé! 😤📜';
+  }
+  return m+cheatNote();
+}
+function showResults(){quizRunning=false;bgMode='particles';initParticles('#ffd700','#ff69b4',40);bgCtx.fillStyle='#0a0a2e';bgCtx.fillRect(0,0,bgCanvas.width,bgCanvas.height);showScreen('resultsScreen');const hScoreEl=document.getElementById('resultHistoryScore'),gScoreEl=document.getElementById('resultGeoScore'),hBar=document.getElementById('historyBar'),gBar=document.getElementById('geoBar');hScoreEl.textContent='0/10';gScoreEl.textContent='0/10';hBar.style.width='0%';gBar.style.width='0%';setTimeout(()=>{hBar.style.width=Math.max(historyScore*10,5)+'%';gBar.style.width=Math.max(geoScore*10,5)+'%';animateCount(hScoreEl,0,historyScore,1200);animateCount(gScoreEl,0,geoScore,1200)},400);setTimeout(()=>{document.getElementById('resultsComment').textContent=getResultsComment()},1800);setTimeout(()=>document.getElementById('btnSurprise').style.display='inline-block',3000)}
+function animateCount(el,from,to,dur){const start=performance.now();function update(now){const p=Math.min((now-start)/dur,1),e=1-Math.pow(1-p,3),cur=Math.round(from+(to-from)*e);el.textContent=cur+'/10';if(p<1)requestAnimationFrame(update)}requestAnimationFrame(update)}
+
+/* Final */
+function getFinalMessage(){
+  const L=document.querySelectorAll('#finalScreen .final-line'),h=historyScore,g=geoScore;
+  let a,b;
+  if(h===10&&g===10){a='Dù em làm đúng hết cả hai môn...<br>dù chẳng còn gì để trêu nữa...';b='(P/S: Dù vậy thì Địa vẫn dễ hơn Sử nhé 😜)';}
+  else if(h===0&&g===0){a='Dù cả hai môn đều 0 điểm...<br>dù em "toang" tới mức này...';b='(P/S: Ôn lại cả Sử lẫn Địa đi em, lo thật đó :)))';}
+  else if(h>g){a='Dù em giỏi Sử hơn Địa thật...<br>dù không thể chứng minh Sử khó hơn Địa...';b='(P/S: Thua em môn Sử rồi, nhưng Địa vẫn dễ hơn Sử nhé 😜)';}
+  else if(h===g){a='Dù hai môn bằng điểm nhau...<br>dù không ai thắng ai...';b='(P/S: Điểm bằng nhau nhưng Địa vẫn dễ hơn Sử nhé👌 😜)';}
+  else if(h===0){a='Dù Sử của em 0 điểm tròn trĩnh...<br>dù Địa dễ vậy mà Sử vẫn khó hơn...';b='(P/S: Ôn Sử gấp đi em, 0 điểm là báo động đỏ đó 🚨😜)';}
+  else if(h>=7){a='Dù Sử em cũng không tệ...<br>dù Địa vẫn nhỉnh hơn một chút...';b='(P/S: Sử cũng ổn đó, nhưng Địa dễ vậy mà chỉ hơn có bấy nhiêu thôi à 😜)';}
+  else{a='Dù Sử có khó hơn Địa bao nhiêu đi nữa,<br>dù điểm thi có "toang" thế nào...';b='(P/S: Nhưng ôn lại Sử đi em, điểm đáng lo lắm đó 😜)';}
+  if(cheatCount>0) b=b.replace(/\)$/,' Với lại em rời tab '+cheatCount+' lần, đừng tưởng không biết nha 👀)');
+  L[2].innerHTML='<p class="final-text">'+a+'</p>';
+  L[5].innerHTML='<p class="final-ps">'+b+'</p>';
+}
+function showFinal(){clearQuizTimer();quizRunning=false;activeQuizType=null;bgMode='golden';particles=[];const gc=['#ffd700','#ffb700','#ff69b4','#f0e68c','#ffffff'];for(let i=0;i<50;i++)particles.push({x:Math.random()*bgCanvas.width,y:Math.random()*bgCanvas.height,r:Math.random()*3+1,vx:(Math.random()-.5)*.4,vy:(Math.random()-.5)*.4-.2,color:gc[Math.floor(Math.random()*gc.length)],alpha:Math.random()*.3+.15});getFinalMessage();showScreen('finalScreen');startConfetti();playCelebration();const lines=document.querySelectorAll('#finalScreen .final-line');lines.forEach(line=>line.classList.remove('visible'));lines.forEach((line,i)=>setTimeout(()=>{if(document.getElementById('finalScreen').classList.contains('active'))line.classList.add('visible')},350+i*500))}
+function restartQuiz(fromFinal=false){if(fromFinal)hasReplayed=true;screenChangeId++;clearQuizTimer();quizRunning=false;activeQuizType=null;pendingCheat=false;closeCheat();confettiActive=false;document.getElementById('transitionScore').classList.remove('revealed');document.getElementById('btnSurprise').style.display='none';document.getElementById('btnRestartResults').style.display=hasReplayed?'inline-flex':'none';document.getElementById('btnSkipIntro').style.display=hasReplayed?'inline-flex':'none';document.getElementById('resultsComment').textContent='';document.getElementById('historyBar').style.width='0%';document.getElementById('geoBar').style.width='0%';document.querySelectorAll('#terminalLines .terminal-line').forEach(line=>{line.classList.remove('visible');line.textContent=''});document.getElementById('btnChallenge').style.display='none';document.getElementById('finalScreen').querySelectorAll('.final-line').forEach(line=>line.classList.remove('visible'));historyQuestions.forEach((q,i)=>historyQuestions[i]=shuffleQ(q));geoQuestions.forEach((q,i)=>geoQuestions[i]=shuffleQ(q));showScreen('introScreen');setTimeout(()=>{if(document.getElementById('introScreen').classList.contains('active'))runTerminal()},250)}
+</script>
+</body>
+</html>
