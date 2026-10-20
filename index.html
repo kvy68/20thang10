@@ -340,7 +340,7 @@ function nextQuestion(type){if(!quizRunning||type!==activeQuizType)return;curren
 
 /* Chống copy */
 let toastT=0;
-function noCopy(e){if(e&&e.preventDefault)e.preventDefault();const t=document.getElementById('copyToast');t.textContent='Không được copy đâu em nha 😜';t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),1600)}
+function noCopy(e){if(e&&e.preventDefault)e.preventDefault();const t=document.getElementById('copyToast');t.textContent='Phát hiện copy';t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),1600)}
 ['copy','cut'].forEach(ev=>document.addEventListener(ev,e=>{if(e.clipboardData)e.clipboardData.setData('text/plain','Không được copy đâu em nha 😜');noCopy(e)}));
 ['contextmenu','selectstart','dragstart'].forEach(ev=>document.addEventListener(ev,e=>{e.preventDefault();if(ev==='contextmenu')noCopy()}));
 document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&['a','c','x','s','u','p'].includes(e.key.toLowerCase()))noCopy(e)});
