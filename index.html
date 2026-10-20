@@ -147,16 +147,16 @@ img{-webkit-user-drag:none}
       <div class="terminal-dot y"></div>
       <div class="terminal-dot g"></div>
     </div>
-    <div id="terminalLines">
-      <div class="terminal-line" data-text="> Khởi động hệ thống ôn luyện thi..."></div>
-      <div class="terminal-line" data-text="> Đang tải hệ thống câu hỏi..."></div>
-      <div class="terminal-line" data-text="> Học sinh: Khánh Vy"></div>
-      <div class="terminal-line" data-text="> Môn thi: Lịch Sử &amp; Địa Lí"></div>
+      <div id="terminalLines">
+      <div class="terminal-line" data-text="> Khởi động hệ thống ôn luyện THPT..."></div>
+      <div class="terminal-line" data-text="> Đang tải ngân hàng câu hỏi (20 câu)..."></div>
+      <div class="terminal-line" data-text="> Chế độ: Chạy thử nghiệm (Beta Test)"></div>
+      <div class="terminal-line" data-text="> Tổ hợp: Lịch Sử (10 câu) &amp; Địa Lí (10 câu)"></div>
       <div class="terminal-line" data-text="> ................................"></div>
-      <div class="terminal-line" data-text="> ⚠ LƯU Ý: KHÔNG được Google,"></div>
-      <div class="terminal-line" data-text=">   KHÔNG được hỏi ai,"></div>
-      <div class="terminal-line" data-text=">   làm bài NGHIÊM TÚC nhé! 😤"></div>
-      <div class="terminal-line" data-text="> Sẵn sàng chưa?"></div>
+      <div class="terminal-line" data-text="> ⚠ LƯU Ý KHI TEST HỆ THỐNG:"></div>
+      <div class="terminal-line" data-text="> - Không thoát tab (để test bộ đếm chống gian lận)"></div>
+      <div class="terminal-line" data-text="> - Hoàn thành đủ 2 vòng để kiểm tra biểu đồ điểm"></div>
+      <div class="terminal-line" data-text="> Hệ thống đã sẵn sàng!"></div>
     </div>
     <button class="btn-challenge" id="btnChallenge" onclick="startQuiz()">📝 BẮT ĐẦU LÀM BÀI</button>
     <button class="btn-skip" id="btnSkipIntro" onclick="skipIntro()" aria-label="Bỏ qua hiệu ứng giới thiệu">Bỏ qua hiệu ứng giới thiệu ↗</button>
@@ -191,7 +191,7 @@ img{-webkit-user-drag:none}
       <span class="score-num" id="transScoreNum">0</span><span class="score-total">/10</span>
     </div>
     <p class="transition-subtitle">Chuẩn bị cho Round 2: ĐỊA LÍ 🌍</p>
-    <p class="transition-hint">(Hệ thống tự động điều chỉnh độ khó theo năng lực thí sinh...)</p>
+    <p class="transition-hint">(Hệ thống đang tự động cân chỉnh độ khó cho vòng 2...)</p>
     <button class="btn-next-round" id="btnNextRound" onclick="startGeography()">BẮT ĐẦU ROUND 2</button>
   </div>
 </div>
@@ -231,7 +231,7 @@ img{-webkit-user-drag:none}
     </div>
     <p class="results-comment" id="resultsComment" aria-live="polite"></p>
     <p class="results-note">Bài làm được chấm ngay trên thiết bị này. Rời tab không bị trừ điểm (có thể do thông báo hoặc cuộc gọi), nhưng đồng hồ vẫn chạy nhé.</p>
-    <div class="action-row"><button class="btn-surprise" id="btnSurprise" onclick="goFullscreen();showFinal()">Tiếp tục→</button><button class="btn-restart" id="btnRestartResults" onclick="restartQuiz()" style="display:none">↻ Chơi lại</button></div>
+    <div class="action-row"><button class="btn-surprise" id="btnSurprise" onclick="goFullscreen();showFinal()">📥 Xuất phiếu điểm chi tiết →</button><button class="btn-restart" id="btnRestartResults" onclick="restartQuiz()" style="display:none">↻ Chơi lại</button></div>
   </div>
 </div>
 
