@@ -92,11 +92,11 @@ input{width:100%;max-width:240px;padding:11px 14px;border-radius:12px;border:1px
 </main>
 
 <script>
-/* ===== Chống copy ===== */
+
 ['copy','cut'].forEach(ev=>document.addEventListener(ev,e=>{e.preventDefault();if(e.clipboardData)e.clipboardData.setData('text/plain','Không được copy đâu em nha 😜')}));
 ['contextmenu','selectstart','dragstart'].forEach(ev=>document.addEventListener(ev,e=>{if(e.target.tagName!=='INPUT')e.preventDefault()}));
 
-/* ===== Log kiểu terminal ===== */
+
 const $=id=>document.getElementById(id),term=$('term');
 const LOG=[
  ['> Đóng cổng 20/10 ............ [OK]','ok'],
@@ -113,7 +113,7 @@ function runLog(i){
   if(i<LOG.length)return typeLine(LOG[i][0],LOG[i][1],()=>runLog(i+1));
   runBar();
 }
-/* ===== Thanh tiến độ kẹt ở 99% ===== */
+
 function runBar(){
   const f=$('fill'),p=$('pct'),t0=performance.now(),dur=3800;
   (function tick(now){
@@ -126,7 +126,7 @@ function runBar(){
 }
 runLog(0);
 
-/* ===== Đếm ngược tới 20/10/2027 (giờ VN) ===== */
+
 const TARGET=Date.UTC(2027,9,19,17,0,0);
 function cd(){
   let s=Math.floor((TARGET-Date.now())/1000);
@@ -136,7 +136,7 @@ function cd(){
 }
 cd();setInterval(cd,1000);
 
-/* ===== Nút "Thử lại" + khóa câu hỏi Sử ===== */
+
 const RETRY=['Vẫn đang bảo trì 🔧','Bấm nữa cũng vậy thôi...','Đã bảo là đang bảo trì rồi mà 😤','Thôi, ôn bài Sử thật đi em 😜','Em kiên trì ghê đó...','Còn bấm nữa là tui... mở cửa sau luôn à 👀'];
 let clicks=0;
 $('retry').onclick=function(){
@@ -156,7 +156,7 @@ function tryUnlock(){
 $('go').onclick=tryUnlock;
 $('ans').addEventListener('keydown',e=>{if(e.key==='Enter')tryUnlock()});
 
-/* ===== Vườn hoa tương tác ===== */
+
 const cv=$('fc'),cx=cv.getContext('2d');
 let fl=[],bl=[],W=0,H=0,D=1,T0=performance.now()+600,pT=0,pX=0,pY=0,pV=0,pL=null;
 const cols=['#ffffff','#fff3b0','#ff4f8b','#ff8fc0','#ffd166','#c77dff','#ff9a76','#ffffff','#b388ff'];
